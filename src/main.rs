@@ -1,5 +1,4 @@
-use std::{io::{Read, Write}, net::{TcpListener, TcpStream}};
-
+use std::{fs::File, io::{Read, Write}, net::{TcpListener, TcpStream}};
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
@@ -19,7 +18,17 @@ fn handle_connection(mut stream: TcpStream) {
 
     // println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
 
-    let response = "HTTP/1.1 200 OK\r\n\r\n";
+    let mut file = File::open("index.html").unwrap();
+    let mut html_contents = String::new();
+    file.read_to_string(&mut html_contents).unwrap();
+
+    // println!("{}", html_contents);
+
+    let response = format!(
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\n\r\n{}",
+        html_contents.len(),
+        html_contents
+    );
 
     stream.write(response.as_bytes()).unwrap();
     stream.flush().unwrap();
